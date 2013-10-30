@@ -28,6 +28,10 @@
  
 package plugin;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -35,17 +39,75 @@ import java.util.HashMap;
  * 
  * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
  */
-public class PluginManager {
-	private String fileLocation;
+public class PluginManager extends ClassLoader{
+	private File dirLocation;
 
 	public PluginManager(String defaultLocation){
-		this.fileLocation = defaultLocation;
+		this.dirLocation = new File(defaultLocation);
 	}
 	
 	public HashMap<String, ArrayList<Servlet>> readInPlugins(){
+		HashMap<String, ArrayList<Servlet>> plugins = new HashMap<String, ArrayList<Servlet>>();
+		FilenameFilter folderFilter = new FilenameFilter() {
+			
+			public boolean accept(File dir, String name) {
+				if (dir.isDirectory() == true){
+					return true;
+				}
+				return false;
+			}
+		};
+		File[] listOfPluginFolders = dirLocation.listFiles(folderFilter);
 		
-		
-		
+		FilenameFilter servletClassFilter = new FilenameFilter() {
+			
+			public boolean accept(File dir, String name) {
+				int j = name.lastIndexOf('.');
+				String extension = "";
+				if (j > 0) {
+				   extension = name.substring(j+1);
+				}
+				if(extension == "class"){
+					return true;
+				}
+				return false;
+			}
+		};
+		for (int i = 0; i < listOfPluginFolders.length; i++) {
+			File currentPlugin = listOfPluginFolders[i];
+			File[] listOfServlets = currentPlugin.listFiles(servletClassFilter);
+			for (int j = 0; j < listOfServlets.length; j++) {
+				File currentServlet = listOfServlets[j];
+			}
+			
+			
+		}
 		return null;
 	}
+	
+	public Class<?> loadClass (String name) throws ClassNotFoundException { 
+        return loadClass(name, true); 
+      }
+    public Class<?> loadClass (String classname, boolean resolve) throws ClassNotFoundException {
+        try {
+          Class<?> c = findLoadedClass(classname);
+          if (c == null) {
+            try { c = findSystemClass(classname); }
+            catch (Exception ex) {}
+          }
+          if (c == null) {
+            String filename = classname.replace('.',File.separatorChar)+".class";
+            File f = new File(dirLocation, filename);
+            int length = (int) f.length();
+            byte[] classbytes = new byte[length];
+            DataInputStream in = new DataInputStream(new FileInputStream(f));
+            in.readFully(classbytes);
+            in.close();
+            c = defineClass(classname, classbytes, 0, length);
+          }
+          if (resolve) resolveClass(c);
+          return c;
+        }
+        catch (Exception ex) { throw new ClassNotFoundException(ex.toString()); }
+      }
 }
