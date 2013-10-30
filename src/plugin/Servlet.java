@@ -28,10 +28,36 @@
  
 package plugin;
 
+import protocol.HttpRequest;
+import protocol.HttpResponse;
+
 /**
  * 
  * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
  */
-public class Servlet {
+public abstract class Servlet {
 
+	public abstract HttpResponse handleRequest(HttpRequest request);
+	
+	public abstract boolean handlesRequestType(String requestType);
+	
+	public HttpResponse handleGet(HttpRequest request)
+	{
+		return null;
+	}
+	
+	public HttpResponse handlePut(HttpRequest request)
+	{
+		return null;
+	}
+	
+	public HttpResponse handlePost(HttpRequest request)
+	{
+		return null;
+	}
+	
+	public HttpResponse handleDelete(HttpRequest request)
+	{
+		return null;
+	}
 }
