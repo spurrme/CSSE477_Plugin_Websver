@@ -28,8 +28,14 @@
  
 package plugin;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import protocol.HttpRequest;
 import protocol.HttpResponse;
+import protocol.HttpResponseFactory;
+import protocol.Protocol;
 
 /**
  * 
@@ -41,23 +47,122 @@ public abstract class Servlet {
 	
 	public abstract boolean handlesRequestType(String requestType);
 	
-	public HttpResponse handleGet(HttpRequest request)
+	private HttpResponse handleGet(HttpRequest request)
 	{
-		return null;
+		// Handling GET request here
+		// Get relative URI path from request
+		String uri = request.getUri();
+		// Get root directory path from server
+		String rootDirectory = request.getDirectoryPath();
+		// Combine them together to form absolute file path
+		File file = new File(rootDirectory + uri);
+		HttpResponse response;
+		// Check if the file exists
+		if(file.exists()) {
+			if(file.isDirectory()) {
+				// Look for default index.html file in a directory
+				String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
+				file = new File(location);
+				if(file.exists()) {
+					// Lets create 200 OK response
+					response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+				}
+				else {
+					// File does not exist so lets create 404 file not found code
+					response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
+				}
+			}
+			else { // Its a file
+				// Lets create 200 OK response
+				response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+			}
+		}
+		else {
+			// File does not exist so lets create 404 file not found code
+			response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
+		}
+		return response;
 	}
 	
-	public HttpResponse handlePut(HttpRequest request)
+	private HttpResponse handlePut(HttpRequest request) throws IOException
 	{
-		return null;
+		// Handling POST request here
+		// Get relative URI path from request
+		String uri = request.getUri();
+		// Get root directory path from server
+		String rootDirectory = request.getDirectoryPath();
+		// Combine them together to form absolute file path
+		File file = new File(rootDirectory + uri);
+		
+		FileWriter writer = new FileWriter(file, true);
+		writer.write(request.getBody());
+		writer.close();
+		HttpResponse response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+		return response;
 	}
 	
-	public HttpResponse handlePost(HttpRequest request)
+	private HttpResponse handlePost(HttpRequest request) throws IOException
 	{
-		return null;
+		// Handling PUT request here
+		// Get relative URI path from request
+		String uri = request.getUri();
+		// Get root directory path from server
+		String rootDirectory = request.getDirectoryPath();
+		// Combine them together to form absolute file path
+		File file = new File(rootDirectory + uri);
+		
+		FileWriter writer = new FileWriter(file, false);
+		writer.write(request.getBody());
+		writer.close();
+		HttpResponse response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+		return response;
 	}
 	
-	public HttpResponse handleDelete(HttpRequest request)
+	private HttpResponse handleDelete(HttpRequest request)
 	{
-		return null;
+		// Handling DELETE request here
+		// Get relative URI path from request
+		String uri = request.getUri();
+		// Get root directory path from server
+		String rootDirectory = request.getDirectoryPath();
+		// Combine them together to form absolute file path
+		File file = new File(rootDirectory + uri);
+		HttpResponse response;
+		// Check if the file exists
+		if(file.exists()) {
+			if(file.isDirectory()) {
+				// Lets delete and create 204 no content response
+				deleteDirectory(file);
+				response = HttpResponseFactory.create204NoContent(Protocol.CLOSE);
+			}
+			else { // Its a file
+				// Lets delete and create 204 no content response
+				file.delete();
+				response = HttpResponseFactory.create204NoContent(Protocol.CLOSE);
+			}
+		}
+		else {
+			// File does not exist so lets create 404 file not found code
+			response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
+		}
+		return response;
+	}
+	/**
+	 * Force deletion of directory
+	 * @param path
+	 * @return
+	 */
+	private static boolean deleteDirectory(File path) {
+	    if (path.exists()) {
+	        File[] files = path.listFiles();
+	        for (int i = 0; i < files.length; i++) {
+	            if (files[i].isDirectory()) {
+	                deleteDirectory(files[i]);
+	            } else {
+	                files[i].delete();
+	            }
+	        }
+	    }
+	    return (path.delete());
 	}
 }

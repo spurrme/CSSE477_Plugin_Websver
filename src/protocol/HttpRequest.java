@@ -41,7 +41,7 @@ public class HttpRequest {
 	private String version;
 	private Map<String, String> header;
 	private String body;
-	
+	private String directoryPath;
 	private HttpRequest() {
 		this.header = new HashMap<String, String>();
 		this.body = new String("");
@@ -55,7 +55,7 @@ public class HttpRequest {
 	public String getMethod() {
 		return method;
 	}
-
+	
 	/**
 	 * The URI of the request object.
 	 * 
@@ -192,5 +192,19 @@ public class HttpRequest {
 		}
 		buffer.append("----------------------------------\n");
 		return buffer.toString();
+	}
+
+	/**
+	 * @return the directoryPath
+	 */
+	public String getDirectoryPath() {
+		return directoryPath;
+	}
+
+	/**
+	 * @param directoryPath the directoryPath to set
+	 */
+	public void setDirectoryPath(String directoryPath) {
+		this.directoryPath = directoryPath;
 	}
 }
