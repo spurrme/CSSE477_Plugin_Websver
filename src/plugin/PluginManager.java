@@ -46,8 +46,8 @@ public class PluginManager extends ClassLoader{
 		this.dirLocation = new File(defaultLocation);
 	}
 	
-	public HashMap<String, ArrayList<Servlet>> readInPlugins(){
-		HashMap<String, ArrayList<Servlet>> plugins = new HashMap<String, ArrayList<Servlet>>();
+	public HashMap<String, ArrayList<Class<?>>> readInPlugins() throws Exception{
+		HashMap<String, ArrayList<Class<?>>> plugins = new HashMap<String, ArrayList<Class<?>>>();
 		FilenameFilter folderFilter = new FilenameFilter() {
 			
 			public boolean accept(File dir, String name) {
@@ -78,11 +78,23 @@ public class PluginManager extends ClassLoader{
 			File[] listOfServlets = currentPlugin.listFiles(servletClassFilter);
 			for (int j = 0; j < listOfServlets.length; j++) {
 				File currentServlet = listOfServlets[j];
+				Class<?> servletClass;
+				try {
+					servletClass = loadClass(currentServlet.getName());
+					if (servletClass.getSuperclass().equals(Servlet.class)){
+						String plugin = currentPlugin.getName();
+						
+						if (!plugins.containsKey(plugin)){
+							plugins.put(plugin, new ArrayList<Class<?>>());
+						}
+						plugins.get(plugin).add(servletClass);
+					}
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
 			}
-			
-			
 		}
-		return null;
+		return plugins;
 	}
 	
 	public Class<?> loadClass (String name) throws ClassNotFoundException { 
