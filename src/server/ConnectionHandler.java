@@ -26,7 +26,6 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Map;
 
 import protocol.HttpRequest;
 import protocol.HttpResponse;
@@ -98,7 +97,6 @@ public class ConnectionHandler implements Runnable {
 		HttpResponse response = null;
 		try {
 			request = HttpRequest.read(this.inStream);
-//			System.out.println(request);
 		}
 		catch(ProtocolException pe) {
 			// We have some sort of protocol exception. Get its status code and create response
@@ -111,45 +109,64 @@ public class ConnectionHandler implements Runnable {
 			else if(status == Protocol.NOT_SUPPORTED_CODE) {
 				response = HttpResponseFactory.create505NotSupported(Protocol.CLOSE);
 			}
+			
+			this.sendResponse(response);
+			return;
 		}
 		catch(Exception e) {
 			e.printStackTrace();
 			// For any other error, we will create bad request response as well
 			response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
-		}
-		
-		if(response != null) {
-			// Means there was an error, now write the response object to the socket
-			try {
-				response.write(this.outStream);
-//				System.out.println(response);
-			}
-			catch(Exception e){
-				// We will ignore this exception
-				e.printStackTrace();
-			}
-
-			// Increment number of connections by 1
-			this.server.incrementConnections(1);
-			// Get the end time
-			long endTime = System.currentTimeMillis();
-			this.server.incrementServiceTime(endTime - this.startTime);
+			this.sendResponse(response);
 			return;
 		}
 		
-		// We reached here means no error so far, so lets process further
+		if(!request.getVersion().equalsIgnoreCase(Protocol.VERSION)) {
+			response = HttpResponseFactory.create505NotSupported(Protocol.CLOSE);
+			this.sendResponse(response);
+		}
+		else {
+			this.delegateRequestToServlet(request);
+		}
+	}
+	
+	/**
+	 * Sends an HttpResponse to the client
+	 * 
+	 * @param response
+	 */
+	private void sendResponse(HttpResponse response)
+	{
 		try {
-			// Fill in the code to create a response for version mismatch.
-			// You may want to use constants such as Protocol.VERSION, Protocol.NOT_SUPPORTED_CODE, and more.
-			// You can check if the version matches as follows
-			if(!request.getVersion().equalsIgnoreCase(Protocol.VERSION)) {
-				response = HttpResponseFactory.create505NotSupported(Protocol.CLOSE);
-			}
-			else if(request.getMethod().equalsIgnoreCase(Protocol.GET)) {
-//				Map<String, String> header = request.getHeader();
-//				String date = header.get("if-modified-since");
-//				String hostName = header.get("host");
-//				
+			response.write(this.outStream);
+			this.socket.close();
+		}
+		catch(Exception e){
+			// We will ignore this exception
+			e.printStackTrace();
+			
+			response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
+			this.sendResponse(response);
+		}
+
+		// Increment number of connections by 1
+		this.server.incrementConnections(1);
+		// Get the end time
+		long endTime = System.currentTimeMillis();
+		this.server.incrementServiceTime(endTime - this.startTime);
+	}
+	
+	/**
+	 * Delegates a request to the appropriate servlet to handle it
+	 * 
+	 * @param request
+	 */
+	private void delegateRequestToServlet(HttpRequest request)
+	{
+		HttpResponse response = null;
+		
+		try {
+			if(request.getMethod().equalsIgnoreCase(Protocol.GET)) {
 				// Handling GET request here
 				// Get relative URI path from request
 				String uri = request.getUri();
@@ -239,44 +256,18 @@ public class ConnectionHandler implements Runnable {
 					response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
 				}
 			}
+			
+			this.sendResponse(response);
 		}
 		catch(Exception e) {
 			e.printStackTrace();
+			
+			// Increment number of connections by 1
+			this.server.incrementConnections(1);
+			// Get the end time
+			long endTime = System.currentTimeMillis();
+			this.server.incrementServiceTime(endTime - this.startTime);
 		}
-		
-		try{
-			// Write response and we are all done so close the socket
-			response.write(this.outStream);
-//			System.out.println(response);
-			this.socket.close();
-		}
-		catch(Exception e){
-			// We will ignore this exception
-			e.printStackTrace();
-		} 
-		
-		// Increment number of connections by 1
-		this.server.incrementConnections(1);
-		// Get the end time
-		long endTime = System.currentTimeMillis();
-		this.server.incrementServiceTime(endTime - this.startTime);
-	}
-	
-	private void sendResponse(HttpResponse response)
-	{
-		try {
-			response.write(this.outStream);
-		}
-		catch(Exception e){
-			// We will ignore this exception
-			e.printStackTrace();
-		}
-
-		// Increment number of connections by 1
-		server.incrementConnections(1);
-		// Get the end time
-		long endTime = System.currentTimeMillis();
-		this.server.incrementServiceTime(endTime - this.startTime);
 	}
 	
 	/**
