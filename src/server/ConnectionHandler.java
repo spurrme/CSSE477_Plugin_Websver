@@ -163,7 +163,7 @@ public class ConnectionHandler implements Runnable {
 	 */
 	private void delegateRequestToServlet(HttpRequest request)
 	{
-		
+		//TODO: Implement the throwing to a serlet class.
 	}
 	
 
