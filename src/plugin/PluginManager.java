@@ -149,6 +149,7 @@ public class PluginManager extends ClassLoader implements Runnable{
 				if (event.isValid()){
 					try {
 						caller.setPlugins(readInPlugins());
+						event.cancel();
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
