@@ -32,18 +32,31 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
+
+import server.Server;
+import static java.nio.file.StandardWatchEventKinds.*;
 
 /**
  * 
  * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
  */
-public class PluginManager extends ClassLoader{
+public class PluginManager extends ClassLoader implements Runnable{
 	private File dirLocation;
+	private Server caller;
 
-	public PluginManager(String defaultLocation){
+	public PluginManager(String defaultLocation, Server caller){
 		this.dirLocation = new File(defaultLocation);
+		this.caller = caller;
 	}
 	
 	public HashMap<String, ArrayList<Class<?>>> readInPlugins() throws Exception{
@@ -122,4 +135,29 @@ public class PluginManager extends ClassLoader{
         }
         catch (Exception ex) { throw new ClassNotFoundException(ex.toString()); }
       }
+
+	/* (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
+	public void run() {
+		Path dir = Paths.get(dirLocation.getPath());
+		try {
+			WatchService watcher = FileSystems.getDefault().newWatchService();
+			dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+			while(true){
+				WatchKey event = watcher.poll();
+				if (event.isValid()){
+					try {
+						caller.setPlugins(readInPlugins());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+
 }

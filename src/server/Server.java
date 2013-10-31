@@ -26,6 +26,8 @@ import gui.WebServer;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * This represents a welcoming server for the incoming
@@ -38,7 +40,7 @@ public class Server implements Runnable {
 	private int port;
 	private boolean stop;
 	private ServerSocket welcomeSocket;
-	
+	private HashMap<String, ArrayList<Class<?>>> plugins;
 	private long connections;
 	private long serviceTime;
 	
@@ -167,5 +169,19 @@ public class Server implements Runnable {
 		if(this.welcomeSocket != null)
 			return this.welcomeSocket.isClosed();
 		return true;
+	}
+
+	/**
+	 * @return the plugins
+	 */
+	public HashMap<String, ArrayList<Class<?>>> getPlugins() {
+		return plugins;
+	}
+
+	/**
+	 * @param plugins the plugins to set
+	 */
+	public void setPlugins(HashMap<String, ArrayList<Class<?>>> plugins) {
+		this.plugins = plugins;
 	}
 }
