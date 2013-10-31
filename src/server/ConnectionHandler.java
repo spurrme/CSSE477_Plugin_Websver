@@ -21,8 +21,6 @@
  
 package server;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -32,6 +30,8 @@ import protocol.HttpResponse;
 import protocol.HttpResponseFactory;
 import protocol.Protocol;
 import protocol.ProtocolException;
+
+
 
 /**
  * This class is responsible for handling a incoming request
