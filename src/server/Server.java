@@ -29,6 +29,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+
 /**
  * This represents a welcoming server for the incoming
  * TCP request from a HTTP client such as a web browser. 
@@ -183,5 +184,14 @@ public class Server implements Runnable {
 	 */
 	public void setPlugins(HashMap<String, ArrayList<Class<?>>> plugins) {
 		this.plugins = plugins;
+	}
+
+	/**
+	 * @param configkey
+	 * @return
+	 */
+	public String getMapping(String configkey) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

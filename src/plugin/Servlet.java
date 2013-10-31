@@ -31,7 +31,6 @@ package plugin;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-
 import protocol.HttpRequest;
 import protocol.HttpResponse;
 import protocol.HttpResponseFactory;
@@ -41,13 +40,13 @@ import protocol.Protocol;
  * 
  * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
  */
-public abstract class Servlet {
+public abstract class Servlet{
 
 	public abstract HttpResponse handleRequest(HttpRequest request);
 	
 	public abstract boolean handlesRequestType(String requestType);
 	
-	private HttpResponse handleGet(HttpRequest request)
+	protected HttpResponse handleGet(HttpRequest request)
 	{
 		// Handling GET request here
 		// Get relative URI path from request
@@ -84,7 +83,7 @@ public abstract class Servlet {
 		return response;
 	}
 	
-	private HttpResponse handlePut(HttpRequest request) throws IOException
+	protected HttpResponse handlePut(HttpRequest request) throws IOException
 	{
 		// Handling POST request here
 		// Get relative URI path from request
@@ -101,7 +100,7 @@ public abstract class Servlet {
 		return response;
 	}
 	
-	private HttpResponse handlePost(HttpRequest request) throws IOException
+	protected HttpResponse handlePost(HttpRequest request) throws IOException
 	{
 		// Handling PUT request here
 		// Get relative URI path from request
@@ -118,7 +117,7 @@ public abstract class Servlet {
 		return response;
 	}
 	
-	private HttpResponse handleDelete(HttpRequest request)
+	protected HttpResponse handleDelete(HttpRequest request)
 	{
 		// Handling DELETE request here
 		// Get relative URI path from request

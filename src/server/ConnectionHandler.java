@@ -21,10 +21,13 @@
  
 package server;
 
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 
+import plugin.Servlet;
 import protocol.HttpRequest;
 import protocol.HttpResponse;
 import protocol.HttpResponseFactory;
@@ -47,8 +50,8 @@ public class ConnectionHandler implements Runnable {
 	private long startTime;
 	private InputStream inStream;
 	private OutputStream outStream;
-	
 	public ConnectionHandler(Server server, Socket socket) {
+		
 		this.server = server;
 		this.socket = socket;
 	}
@@ -160,11 +163,40 @@ public class ConnectionHandler implements Runnable {
 	 * Delegates a request to the appropriate servlet to handle it
 	 * 
 	 * @param request
+	 * @throws Exception 
 	 */
-	private void delegateRequestToServlet(HttpRequest request)
+	private HttpResponse delegateRequestToServlet(HttpRequest request)
 	{
-		//TODO: Implement the throwing to a serlet class.
-	}
+		String configkey = request.getMethod() + request.getUri();
+		String pluginName = request.getPluginName();
+		HttpResponse response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
+		if(pluginName != null){
+			ArrayList<Class<?>> servlets = this.server.getPlugins().get(pluginName);
+			for (Class<?> class1 : servlets) {
+				if(class1.getName().equalsIgnoreCase(this.server.getMapping(configkey))){
+					try {
+						Servlet servlet = (Servlet) class1.newInstance();
+						if(servlet.handlesRequestType(request.getMethod())){
+							response  = servlet.handleRequest(request);
+						}else{
+							response = HttpResponseFactory.create501NotImplemented(Protocol.CLOSE);
+						}
+						} catch (InstantiationException e) {
+						e.printStackTrace();
+						} catch (IllegalAccessException e) {
+						e.printStackTrace();
+						}
+					}else{
+						response = HttpResponseFactory.create501NotImplemented(Protocol.CLOSE);
+					}
+			}
+		}else{
+			StaticServlet staticResourceServlet = new StaticServlet();
+			if(staticResourceServlet.handlesRequestType(request.getMethod())){
+				response = staticResourceServlet.handleRequest(request);
+			}
+		}
+		return response;
 	
-
+	}
 }
