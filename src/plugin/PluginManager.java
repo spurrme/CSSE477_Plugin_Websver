@@ -28,11 +28,16 @@
  
 package plugin;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -104,8 +109,98 @@ public class PluginManager extends ClassLoader implements Runnable{
 					e.printStackTrace();
 				}
 			}
+			updateConfigurationMap(currentPlugin);
 		}
 		return plugins;
+	}
+	
+	
+	/**
+	 * Updates the server's map of Request Method + Plugin Name + Servet URI -> Servlet Class Name
+	 * 
+	 * @param plugin File
+	 */
+	private void updateConfigurationMap(File currentPlugin) {
+		
+		try 
+		{
+			//config file should be named config.txt to work
+			String[] pluginMappings = openFile(currentPlugin.getAbsolutePath() + "/config.txt");
+	    	
+		    for (int i = 0; i < pluginMappings.length; i++)
+		    {
+				try {
+					String[] parsedMapping = pluginMappings[i].split("\\s+");
+					String requestMethod = parsedMapping[0];
+					String pluginServletURI = parsedMapping[1];
+					String servletClass = parsedMapping[2];
+
+					if (!caller.servletMappings.containsKey(pluginServletURI)) {
+						HashMap<String, String> newMapping = new HashMap<String, String>();
+						newMapping.put(requestMethod, servletClass);
+						caller.servletMappings
+								.put(pluginServletURI, newMapping);
+					} else {
+						if (!caller.servletMappings.get(pluginServletURI)
+								.containsKey(requestMethod)) {
+							caller.servletMappings.get(pluginServletURI).put(
+									requestMethod, servletClass);
+						}
+					}
+				} catch (NullPointerException e)
+		    	{
+		    		e.printStackTrace();
+		    	}
+				
+		    }
+			
+		} catch (IOException e) 
+		{
+			e.printStackTrace();
+		} 
+	}
+	
+	
+	/**
+	 * @param path = directory of the file to be read
+	 * @return textData  = array of strings in the file
+	 */
+	private String[] openFile(String path) throws IOException{
+
+		FileReader fr = new FileReader(path);
+		BufferedReader textReader = new BufferedReader(fr);
+		
+		int numberOfLines = readLines(path);
+		String[] textData = new String[numberOfLines];
+		
+		for (int i = 0; i < numberOfLines; i++) {
+			textData[i] = textReader.readLine();
+		}
+		
+		fr.close();
+		textReader.close();
+		
+		return textData;
+	}
+	
+	/**
+	 * @param path = directory of the file to be read
+	 * @return numberOfLines
+	 */
+	int readLines(String path) throws IOException{
+		FileReader file_to_read = new FileReader(path);
+		BufferedReader bf = new BufferedReader(file_to_read);
+		
+		String line;
+		int numberOfLines = 0;
+		
+		while((line = bf.readLine()) != null) {
+			numberOfLines++;
+		}
+		bf.close();
+		file_to_read.close();
+		
+		return numberOfLines;
 	}
 	
 	public Class<?> loadClass (String name) throws ClassNotFoundException { 

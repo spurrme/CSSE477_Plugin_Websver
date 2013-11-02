@@ -44,6 +44,7 @@ public class Server implements Runnable {
 	private HashMap<String, ArrayList<Class<?>>> plugins;
 	private long connections;
 	private long serviceTime;
+	public HashMap<String, HashMap<String, String>> servletMappings;
 	
 	private WebServer window;
 	/**

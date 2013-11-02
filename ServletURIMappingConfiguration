@@ -1,1 +1,1 @@
-GET root DefaultServlet
+REQUESTMETHOD Plugin/ServletURI ServletClassName
