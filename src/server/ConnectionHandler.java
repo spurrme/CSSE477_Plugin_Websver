@@ -129,7 +129,7 @@ public class ConnectionHandler implements Runnable {
 			this.sendResponse(response);
 		}
 		else {
-			this.delegateRequestToServlet(request);
+			sendResponse(this.delegateRequestToServlet(request));
 		}
 	}
 	
