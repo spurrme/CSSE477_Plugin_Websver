@@ -55,7 +55,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
-
 import server.Server;
 import static java.nio.file.StandardWatchEventKinds.*;
 
@@ -63,13 +62,15 @@ import static java.nio.file.StandardWatchEventKinds.*;
  * 
  * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
  */
-public class PluginManager implements Runnable{
+
+public class PluginManager extends Thread{
 	private File dirLocation;
 	private Server caller;
 
 	public PluginManager(String defaultLocation, Server caller){
 		this.dirLocation = new File(defaultLocation);
 		this.caller = caller;
+		start();
 	}
 	
 	public HashMap<String, ArrayList<Class<?>>> readInPlugins() throws Exception{
