@@ -162,12 +162,24 @@ public class HttpRequest {
 			// Processed one more line, now lets read another header line and loop
 			line = reader.readLine().trim();
 		}
-		body = "";
-		if(reader.ready()){
-			line = reader.readLine().trim();
-			while(!line.equals("")){
-				body += line;
-				line = reader.readLine().trim();
+		String contentLenghtString = request.header.get(Protocol.CONTENT_LENGTH.toLowerCase());
+		int contentLength = 0;
+		if(contentLenghtString != null) {
+			try {
+				contentLength = Integer.parseInt(contentLenghtString);
+			}
+			catch(Exception e){}
+		}
+		
+		if(contentLength > 0) {	
+			char[] bodytemp = new char[contentLength];
+			try {
+				reader.read(bodytemp);
+				body = String.valueOf(bodytemp);
+
+			}
+			catch(Exception e) {
+				e.printStackTrace();
 			}
 		}
 		return request;
