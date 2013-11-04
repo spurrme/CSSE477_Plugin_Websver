@@ -123,7 +123,15 @@ public class Servlet1 extends Servlet {
 			try {
 				PrintWriter out;
 				out = new PrintWriter(new BufferedWriter(new FileWriter(file, false)));
-				count++;
+				
+				String body = request.getBody();
+				if (!body.trim().equals("")) {
+					body = body.trim();
+					count += Integer.parseInt(body);
+				} else {
+					count++;
+				}
+				
 				out.println(count);
 				out.close();
 			} catch (IOException e) {
@@ -152,7 +160,15 @@ public class Servlet1 extends Servlet {
 			try {
 				PrintWriter out;
 				out = new PrintWriter(new BufferedWriter(new FileWriter(file, false)));
-				count=1;
+				
+				String body = request.getBody();
+				if (!body.trim().equals("")) {
+					body = body.trim();
+					count = Integer.parseInt(body);
+				} else {
+					count = 1;
+				}
+				
 				out.println(count);
 				out.close();
 			} catch (IOException e) {
@@ -163,10 +179,47 @@ public class Servlet1 extends Servlet {
 			response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
 		}
 		else {
+			try {
+				file.createNewFile();
+				PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
+				
+				String body = request.getBody();
+				if (!body.trim().equals("")) {
+					body = body.trim();
+					count = Integer.parseInt(body);
+				} else {
+					count = 1;
+				}
+				
+				out.println(count);
+				out.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+		}
+		
+		return response;
+	}
+	
+	@Override
+	protected HttpResponse handleDelete(HttpRequest request)
+	{
+		String rootDirectory = request.getDirectoryPath();
+		// Combine them together to form absolute file path
+		File file = new File(rootDirectory + "\\test\\Plugin1\\count.txt");
+		HttpResponse response;
+		// Check if the file exists
+		if(file.exists()) {
+			// Lets delete and create 204 no content response
+			file.delete();
+			response = HttpResponseFactory.create204NoContent(Protocol.CLOSE);
+		}
+		else {
 			// File does not exist so lets create 404 file not found code
 			response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
 		}
-		
 		return response;
 	}
 

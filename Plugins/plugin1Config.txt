@@ -1,4 +1,5 @@
 GET Plugin1/Servlet1 Plugin1.Servlet1
 PUT Plugin1/Servlet1 Plugin1.Servlet1
 POST Plugin1/Servlet1 Plugin1.Servlet1
+DELETE Plugin1/Servlet1 Plugin1.Servlet1
 LOAD Plugin1/ServletWebLoader	Plugin1.ServletWebLoader
