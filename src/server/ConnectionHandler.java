@@ -167,6 +167,7 @@ public class ConnectionHandler implements Runnable {
 	 */
 	private HttpResponse delegateRequestToServlet(HttpRequest request)
 	{
+		/*
 		String configkey = request.getMethod() + request.getUri();
 		String pluginName = request.getPluginName();
 		HttpResponse response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
@@ -197,6 +198,41 @@ public class ConnectionHandler implements Runnable {
 			}
 		}
 		return response;
-	
+	*/
+		String uri = request.getUri();
+		String method = request.getUri();
+		String pluginName = request.getPluginName();
+		String servletName = this.server.getServletClassName(uri, method);
+		HttpResponse response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
+		
+		if (servletName != null) {
+			ArrayList<Class<?>> servlets = this.server.getPlugins().get(pluginName);
+			
+			for (Class<?> servletClass : servlets) {
+				if (servletClass.getName().equalsIgnoreCase(servletName)) {
+					try {
+						Servlet servlet = (Servlet)servletClass.newInstance();
+						
+						if (servlet.handlesRequestType(method)) {
+							response = servlet.handleRequest(request);
+						} else {
+							response = HttpResponseFactory.create501NotImplemented(Protocol.CLOSE);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		} else {
+			StaticServlet staticServlet = new StaticServlet();
+			
+			if (staticServlet.handlesRequestType(method)) {
+				response = staticServlet.handleRequest(request);
+			} else {
+				response = HttpResponseFactory.create501NotImplemented(Protocol.CLOSE);
+			}
+		}
+		
+		return response;
 	}
 }

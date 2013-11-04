@@ -213,15 +213,7 @@ public class HttpRequest {
 	 * @return the pluginName
 	 */
 	public String getPluginName() {
-		return pluginName;
+		int index = this.uri.indexOf('/');
+		return this.uri.substring(0, index);
 	}
-
-	/**
-	 * @param pluginName the pluginName to set
-	 */
-	public void setPluginName(String pluginName) {
-		this.pluginName = pluginName;
-	}
-
-
 }

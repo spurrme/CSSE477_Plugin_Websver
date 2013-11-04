@@ -29,6 +29,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import plugin.PluginManager;
+
 
 /**
  * This represents a welcoming server for the incoming
@@ -38,6 +40,7 @@ import java.util.HashMap;
  */
 public class Server implements Runnable {
 	private String rootDirectory;
+	private String pluginDirectory;
 	private int port;
 	private boolean stop;
 	private ServerSocket welcomeSocket;
@@ -51,8 +54,9 @@ public class Server implements Runnable {
 	 * @param rootDirectory
 	 * @param port
 	 */
-	public Server(String rootDirectory, int port, WebServer window) {
+	public Server(String rootDirectory, String pluginDirectory, int port, WebServer window) {
 		this.rootDirectory = rootDirectory;
+		this.pluginDirectory = pluginDirectory;
 		this.port = port;
 		this.stop = false;
 		this.connections = 0;
@@ -122,6 +126,9 @@ public class Server implements Runnable {
 		try {
 			this.welcomeSocket = new ServerSocket(port);
 			
+			PluginManager manager = new PluginManager(this.pluginDirectory, this);
+			new Thread(manager).start();
+			
 			// Now keep welcoming new connections until stop flag is set to true
 			while(true) {
 				// Listen for incoming socket connection
@@ -189,10 +196,17 @@ public class Server implements Runnable {
 
 	/**
 	 * @param configkey
-	 * @return
+	 * @return 
 	 */
-	public String getMapping(String configkey) {
-		// TODO Auto-generated method stub
-		return null;
+	public String getServletClassName(String uri, String method) {
+		String servletClassName = null;
+		
+		if(this.servletMappings.containsKey(uri)) {
+			if(this.servletMappings.get(uri).containsKey(method)) {
+				servletClassName = this.servletMappings.get(uri).get(method);
+			}
+		}
+		
+		return servletClassName;
 	}
 }

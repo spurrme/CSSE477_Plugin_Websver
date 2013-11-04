@@ -38,6 +38,8 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -67,7 +69,7 @@ public class PluginManager extends ClassLoader implements Runnable{
 		FilenameFilter folderFilter = new FilenameFilter() {
 			
 			public boolean accept(File dir, String name) {
-				if (dir.isDirectory() == true){
+				if (dir.isDirectory()){
 					return true;
 				}
 				return false;
@@ -81,9 +83,9 @@ public class PluginManager extends ClassLoader implements Runnable{
 				int j = name.lastIndexOf('.');
 				String extension = "";
 				if (j > 0) {
-				   extension = name.substring(j+1);
+				   extension = name.substring(j+1, name.length());
 				}
-				if(extension == "class"){
+				if(extension.equals("class")){
 					return true;
 				}
 				return false;
@@ -96,10 +98,10 @@ public class PluginManager extends ClassLoader implements Runnable{
 				File currentServlet = listOfServlets[j];
 				Class<?> servletClass;
 				try {
-					servletClass = loadClass(currentServlet.getName());
+					servletClass = loadClass(currentServlet.getAbsolutePath());
 					if (servletClass.getSuperclass().equals(Servlet.class)){
 						String plugin = currentPlugin.getName();
-						
+						System.out.println(servletClass.getName());
 						if (!plugins.containsKey(plugin)){
 							plugins.put(plugin, new ArrayList<Class<?>>());
 						}
@@ -206,9 +208,10 @@ public class PluginManager extends ClassLoader implements Runnable{
 	public Class<?> loadClass (String name) throws ClassNotFoundException { 
         return loadClass(name, true); 
       }
+	
     public Class<?> loadClass (String classname, boolean resolve) throws ClassNotFoundException {
         try {
-          Class<?> c = findLoadedClass(classname);
+          Class<?> c = findClass(classname);
           if (c == null) {
             try { c = findSystemClass(classname); }
             catch (Exception ex) {}
@@ -235,11 +238,13 @@ public class PluginManager extends ClassLoader implements Runnable{
 	public void run() {
 		Path dir = Paths.get(dirLocation.getPath());
 		try {
+			caller.setPlugins(readInPlugins());
+			
 			WatchService watcher = FileSystems.getDefault().newWatchService();
 			dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
 			while(true){
 				WatchKey event = watcher.poll();
-				if (event.isValid()){
+				if (event != null && event.isValid()){
 					try {
 						caller.setPlugins(readInPlugins());
 						event.cancel();
@@ -248,7 +253,7 @@ public class PluginManager extends ClassLoader implements Runnable{
 					}
 				}
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
