@@ -139,7 +139,7 @@ public class Server implements Runnable {
 				
 				// Create a handler for this incoming connection and start the handler in a new thread
 				ConnectionHandler handler = new ConnectionHandler(this, connectionSocket);
-				new Thread(handler).start();
+				handler.run();
 			}
 			this.welcomeSocket.close();
 		}
