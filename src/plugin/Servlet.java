@@ -28,9 +28,12 @@
  
 package plugin;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+
 import protocol.HttpRequest;
 import protocol.HttpResponse;
 import protocol.HttpResponseFactory;
@@ -85,35 +88,93 @@ public abstract class Servlet{
 	
 	protected HttpResponse handlePut(HttpRequest request) throws IOException
 	{
-		// Handling POST request here
 		// Get relative URI path from request
 		String uri = request.getUri();
 		// Get root directory path from server
 		String rootDirectory = request.getDirectoryPath();
+		String body = request.getBody();
 		// Combine them together to form absolute file path
 		File file = new File(rootDirectory + uri);
+		HttpResponse response = null;
+		if(file.exists()) {
+			if(file.isDirectory()) {
+				// Look for default index.html file in a directory
+				String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
+				file = new File(location);
+				//add to the file
+				if(file.exists()) {
+					 PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
+					 out.println(body);
+					 out.close();
+					 response  = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+				}
+				//the file was not found
+				else {
 		
-		FileWriter writer = new FileWriter(file, true);
-		writer.write(request.getBody());
-		writer.close();
-		HttpResponse response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+					 response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
+				}
+			}
+			else { // Its a file
+				// Lets create 200 OK response
+				 PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
+				 out.println(body);
+				 out.close();
+				 response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+			}
+		}//The file is not a file and cannot be added to
+		else {
+			 response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
+		}
 		return response;
 	}
 	
 	protected HttpResponse handlePost(HttpRequest request) throws IOException
 	{
-		// Handling PUT request here
 		// Get relative URI path from request
 		String uri = request.getUri();
+		String body = request.getBody();
 		// Get root directory path from server
 		String rootDirectory = request.getDirectoryPath();
 		// Combine them together to form absolute file path
 		File file = new File(rootDirectory + uri);
-		
-		FileWriter writer = new FileWriter(file, false);
-		writer.write(request.getBody());
-		writer.close();
-		HttpResponse response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+		HttpResponse response = null;
+		if(file.exists()) {
+			if(file.isDirectory()) {
+				// Look for default index.html file in a directory
+				String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
+				file = new File(location);
+				if(file.exists()) {
+					 PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
+					 out.println(body);
+					 out.close();
+					 response  = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+				}
+				else {
+					 file.createNewFile();
+					 PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
+					 out.println(body);
+					 out.close();
+					 response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+				}
+			}
+			else { // Its a file
+				// Lets create 200 OK response
+				 file.createNewFile();
+				 PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
+				 out.println(body);
+				 out.close();
+				 response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+			}
+		}//create all the needed directories and then create the file. Then add anything in the body to the file
+		else {
+			 uri = uri.substring(0, uri.indexOf(file.getName()));
+			 new File(rootDirectory + uri).mkdir();
+			 file.createNewFile();
+			 PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
+			 out.println(body);
+			 out.close();
+			 response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+		}
 		return response;
 	}
 	

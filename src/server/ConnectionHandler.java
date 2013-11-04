@@ -129,6 +129,7 @@ public class ConnectionHandler implements Runnable {
 			this.sendResponse(response);
 		}
 		else {
+			request.setDirectoryPath(this.server.getRootDirectory());
 			sendResponse(this.delegateRequestToServlet(request));
 		}
 	}
