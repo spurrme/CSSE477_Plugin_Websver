@@ -49,9 +49,10 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
+
+import javax.xml.stream.events.StartDocument;
 
 import server.Server;
 import static java.nio.file.StandardWatchEventKinds.*;
