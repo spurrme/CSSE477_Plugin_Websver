@@ -169,7 +169,7 @@ public class Server implements Runnable {
 	}
 	
 	/**
-	 * Checks if the server is stopeed or not.
+	 * Checks if the server is stopped or not.
 	 * @return
 	 */
 	public boolean isStoped() {

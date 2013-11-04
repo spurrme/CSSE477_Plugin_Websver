@@ -39,16 +39,21 @@ import java.net.URLClassLoader;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
+
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
+
 import server.Server;
 import static java.nio.file.StandardWatchEventKinds.*;
 
@@ -243,15 +248,18 @@ public class PluginManager extends Thread{
 			WatchService watcher = FileSystems.getDefault().newWatchService();
 			dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
 			while(true){
-				WatchKey event = watcher.poll();
-				if (event != null && event.isValid()){
-					try {
-						caller.setPlugins(readInPlugins());
-						event.cancel();
-					} catch (Exception e) {
-						e.printStackTrace();
+				WatchKey key = watcher.take();
+				List<WatchEvent<?>> events = key.pollEvents();
+					if (!events.isEmpty()){
+						try {
+							System.out.println("Loaded Plugins");
+							caller.setPlugins(readInPlugins());
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 					}
-				}
+				events.clear();
+				key.reset();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -57,11 +57,9 @@ public class ServletWebLoader extends Servlet {
 				try {
 					Desktop.getDesktop().browse(new URI(request.getBody()));
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					return response;
 				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					return response;
 				}
 			}
 		} 
