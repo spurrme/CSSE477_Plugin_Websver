@@ -38,6 +38,8 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.FileSystems;
@@ -47,6 +49,11 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
+
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
 
 import server.Server;
 import static java.nio.file.StandardWatchEventKinds.*;
@@ -66,53 +73,17 @@ public class PluginManager extends ClassLoader implements Runnable{
 	
 	public HashMap<String, ArrayList<Class<?>>> readInPlugins() throws Exception{
 		HashMap<String, ArrayList<Class<?>>> plugins = new HashMap<String, ArrayList<Class<?>>>();
-		FilenameFilter folderFilter = new FilenameFilter() {
-			
-			public boolean accept(File dir, String name) {
-				if (dir.isDirectory()){
-					return true;
-				}
-				return false;
-			}
-		};
-		File[] listOfPluginFolders = dirLocation.listFiles(folderFilter);
+		File[] files = this.dirLocation.listFiles();
 		
-		FilenameFilter servletClassFilter = new FilenameFilter() {
-			
-			public boolean accept(File dir, String name) {
-				int j = name.lastIndexOf('.');
-				String extension = "";
-				if (j > 0) {
-				   extension = name.substring(j+1, name.length());
-				}
-				if(extension.equals("class")){
-					return true;
-				}
-				return false;
+		for (File file : files) {
+			String fileName = file.getName();
+			if (fileName.endsWith(".jar")) {
+				String pluginName = fileName.replaceAll(".jar", "");
+				ArrayList<Class<?>> classes = getClassesFromJar(file.getAbsolutePath());
+				plugins.put(pluginName, classes);	
 			}
-		};
-		for (int i = 0; i < listOfPluginFolders.length; i++) {
-			File currentPlugin = listOfPluginFolders[i];
-			File[] listOfServlets = currentPlugin.listFiles(servletClassFilter);
-			for (int j = 0; j < listOfServlets.length; j++) {
-				File currentServlet = listOfServlets[j];
-				Class<?> servletClass;
-				try {
-					servletClass = loadClass(currentServlet.getAbsolutePath());
-					if (servletClass.getSuperclass().equals(Servlet.class)){
-						String plugin = currentPlugin.getName();
-						System.out.println(servletClass.getName());
-						if (!plugins.containsKey(plugin)){
-							plugins.put(plugin, new ArrayList<Class<?>>());
-						}
-						plugins.get(plugin).add(servletClass);
-					}
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				}
-			}
-			updateConfigurationMap(currentPlugin);
 		}
+		
 		return plugins;
 	}
 	
@@ -204,33 +175,65 @@ public class PluginManager extends ClassLoader implements Runnable{
 		
 		return numberOfLines;
 	}
-	
-	public Class<?> loadClass (String name) throws ClassNotFoundException { 
-        return loadClass(name, true); 
-      }
-	
-    public Class<?> loadClass (String classname, boolean resolve) throws ClassNotFoundException {
-        try {
-          Class<?> c = findClass(classname);
-          if (c == null) {
-            try { c = findSystemClass(classname); }
-            catch (Exception ex) {}
-          }
-          if (c == null) {
-            String filename = classname.replace('.',File.separatorChar)+".class";
-            File f = new File(dirLocation, filename);
-            int length = (int) f.length();
-            byte[] classbytes = new byte[length];
-            DataInputStream in = new DataInputStream(new FileInputStream(f));
-            in.readFully(classbytes);
-            in.close();
-            c = defineClass(classname, classbytes, 0, length);
-          }
-          if (resolve) resolveClass(c);
-          return c;
-        }
-        catch (Exception ex) { throw new ClassNotFoundException(ex.toString()); }
-      }
+    
+    private static ArrayList<Class<?>> getClassesFromJar(String jarName) {
+    	ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
+    	URL url = null;
+    	try {
+			url = new URL("file:///" + jarName);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+    	
+		URLClassLoader urlLoader = new URLClassLoader(new URL[] {url});
+    	
+    	ArrayList<String> resources = getResourceNamesFromJar(jarName);
+    	for (String resource : resources) {
+    		if (resource.endsWith(".class")) {
+    			resource = resource.substring(0, resource.lastIndexOf('.'));
+	    		Class<?> c = null;
+				try {
+					c = urlLoader.loadClass(resource);
+					classes.add(c);
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+    		}
+    	}
+    	
+    	try {
+			urlLoader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    	
+    	return classes;
+    }
+    
+    private static ArrayList<String> getResourceNamesFromJar(String jarName) {
+    	ArrayList<String> classes = new ArrayList<String>();
+
+		try{
+		    JarInputStream jarFile = new JarInputStream(new FileInputStream(jarName));
+		    JarEntry jarEntry;
+		
+		    while(true) {
+		    	jarEntry = jarFile.getNextJarEntry();
+		    	
+		    	if(jarEntry == null){
+		    		break;
+		    	}
+		    	
+		    	if(jarEntry.getName().endsWith(".class") || jarEntry.getName().endsWith(".txt")) {
+		    		classes.add(jarEntry.getName().replaceAll("/", "\\."));
+		    	}
+		    }
+		    jarFile.close();
+		} catch(Exception e){
+		    e.printStackTrace ();
+		}
+		return classes;
+    }
 
 	/* (non-Javadoc)
 	 * @see java.lang.Runnable#run()

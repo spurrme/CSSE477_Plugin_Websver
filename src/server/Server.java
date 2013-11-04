@@ -40,7 +40,6 @@ import plugin.PluginManager;
  */
 public class Server implements Runnable {
 	private String rootDirectory;
-	private String pluginDirectory;
 	private int port;
 	private boolean stop;
 	private ServerSocket welcomeSocket;
@@ -54,9 +53,8 @@ public class Server implements Runnable {
 	 * @param rootDirectory
 	 * @param port
 	 */
-	public Server(String rootDirectory, String pluginDirectory, int port, WebServer window) {
+	public Server(String rootDirectory, int port, WebServer window) {
 		this.rootDirectory = rootDirectory;
-		this.pluginDirectory = pluginDirectory;
 		this.port = port;
 		this.stop = false;
 		this.connections = 0;
@@ -126,7 +124,7 @@ public class Server implements Runnable {
 		try {
 			this.welcomeSocket = new ServerSocket(port);
 			
-			PluginManager manager = new PluginManager(this.pluginDirectory, this);
+			PluginManager manager = new PluginManager("Plugins", this);
 			new Thread(manager).start();
 			
 			// Now keep welcoming new connections until stop flag is set to true

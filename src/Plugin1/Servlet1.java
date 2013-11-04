@@ -1,4 +1,4 @@
-package pluginSet1.Plugin1;
+package Plugin1;
 import plugin.Servlet;
 import protocol.HttpRequest;
 import protocol.HttpResponse;

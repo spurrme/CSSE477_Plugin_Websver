@@ -46,10 +46,7 @@ public class WebServer extends JFrame {
 	private JTextField txtPortNumber;
 	private JLabel lblRootDirectory;
 	private JTextField txtRootDirectory;
-	private JLabel lblPluginDirectory;
-	private JTextField txtPluginDirectory;
 	private JButton butSelect;
-	private JButton butSelect1;
 
 	private JPanel panelInput;
 	private JButton butStartServer;
@@ -107,11 +104,6 @@ public class WebServer extends JFrame {
 		this.txtRootDirectory.setEditable(false);
 		this.txtRootDirectory.setPreferredSize(new Dimension(400, 21));
 		this.butSelect = new JButton("Select");
-		this.lblPluginDirectory = new JLabel("Select Plugin Directory");
-		this.txtPluginDirectory = new JTextField(System.getProperty("user.dir") + "\\bin\\PluginSet1");
-		this.txtPluginDirectory.setEditable(false);
-		this.txtPluginDirectory.setPreferredSize(new Dimension(400, 21));
-		this.butSelect1 = new JButton("Select");
 
 		this.panelInput.setBorder(BorderFactory.createTitledBorder("Input Parameters"));
 		this.panelInput.setLayout(new SpringLayout());
@@ -121,13 +113,9 @@ public class WebServer extends JFrame {
 		this.panelInput.add(this.txtRootDirectory);
 		this.panelInput.add(new JLabel("")); // Empty label
 		this.panelInput.add(this.butSelect);
-		this.panelInput.add(this.lblPluginDirectory);
-		this.panelInput.add(this.txtPluginDirectory);
-		this.panelInput.add(new JLabel("")); // Empty label
-		this.panelInput.add(this.butSelect1);
 
 		// Compact the grid
-		SpringUtilities.makeCompactGrid(this.panelInput, 5, 2, 5, 5, 5, 5);
+		SpringUtilities.makeCompactGrid(this.panelInput, 3, 2, 5, 5, 5, 5);
 
 
 		// Run server widgets
@@ -175,24 +163,6 @@ public class WebServer extends JFrame {
 			}
 		});
 		
-		// Add the action to be done when select directory button is pressed
-				this.butSelect1.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						// Get hold of the current directory
-						String currentDirectory = WebServer.this.txtPluginDirectory.getText();
-						JFileChooser fileChooser = new JFileChooser(currentDirectory);
-						fileChooser.setDialogTitle("Chose Web Server Root Directory");
-						fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-						fileChooser.setMultiSelectionEnabled(false);
-						fileChooser.setAcceptAllFileFilterUsed(false);
-						if(fileChooser.showOpenDialog(WebServer.this) == JFileChooser.APPROVE_OPTION) {
-							// A folder has been chosen
-							currentDirectory = fileChooser.getSelectedFile().getAbsolutePath();
-							WebServer.this.txtPluginDirectory.setText(currentDirectory);
-						}
-					}
-				});
-		
 		// Add action for run server
 		this.butStartServer.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -213,10 +183,9 @@ public class WebServer extends JFrame {
 				
 				// Get hold of the root directory
 				String rootDirectory = WebServer.this.txtRootDirectory.getText();
-				String pluginDirectory = WebServer.this.txtPluginDirectory.getText();
 				
 				// Now run the server in non-gui thread
-				server = new Server(rootDirectory, pluginDirectory, port, WebServer.this);
+				server = new Server(rootDirectory, port, WebServer.this);
 				rateUpdater = new ServiceRateUpdater();
 				
 				// Disable widgets
