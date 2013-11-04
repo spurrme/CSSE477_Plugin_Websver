@@ -58,7 +58,7 @@ public abstract class Servlet{
 		String rootDirectory = request.getDirectoryPath();
 		// Combine them together to form absolute file path
 		File file = new File(rootDirectory + uri);
-		HttpResponse response;
+		HttpResponse response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
 		// Check if the file exists
 		if(file.exists()) {
 			if(file.isDirectory()) {
@@ -79,10 +79,6 @@ public abstract class Servlet{
 				response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
 			}
 		}
-		else {
-			// File does not exist so lets create 404 file not found code
-			response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
-		}
 		return response;
 	}
 	
@@ -95,7 +91,7 @@ public abstract class Servlet{
 		String body = request.getBody();
 		// Combine them together to form absolute file path
 		File file = new File(rootDirectory + uri);
-		HttpResponse response = null;
+		HttpResponse response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
 		if(file.exists()) {
 			if(file.isDirectory()) {
 				// Look for default index.html file in a directory
@@ -121,10 +117,8 @@ public abstract class Servlet{
 				 out.close();
 				 response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
 			}
-		}//The file is not a file and cannot be added to
-		else {
-			 response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
 		}
+		
 		return response;
 	}
 	
@@ -137,43 +131,55 @@ public abstract class Servlet{
 		String rootDirectory = request.getDirectoryPath();
 		// Combine them together to form absolute file path
 		File file = new File(rootDirectory + uri);
-		HttpResponse response = null;
-		if(file.exists()) {
-			if(file.isDirectory()) {
-				// Look for default index.html file in a directory
-				String location = rootDirectory + uri + System.getProperty("file.separator") + Protocol.DEFAULT_FILE;
-				file = new File(location);
-				if(file.exists()) {
-					 PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
-					 out.println(body);
-					 out.close();
-					 response  = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+		HttpResponse response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
+		try {
+			if (file.exists()) {
+				if (file.isDirectory()) {
+					// Look for default index.html file in a directory
+					String location = rootDirectory + uri
+							+ System.getProperty("file.separator")
+							+ Protocol.DEFAULT_FILE;
+					file = new File(location);
+					if (file.exists()) {
+						PrintWriter out = new PrintWriter(new BufferedWriter(
+								new FileWriter(file, true)));
+						out.println(body);
+						out.close();
+						response = HttpResponseFactory.create200OK(file,
+								Protocol.CLOSE);
+					} else {
+						file.createNewFile();
+						PrintWriter out = new PrintWriter(new BufferedWriter(
+								new FileWriter(file, true)));
+						out.println(body);
+						out.close();
+						response = HttpResponseFactory.create200OK(file,
+								Protocol.CLOSE);
+					}
+				} else { // Its a file
+							// Lets create 200 OK response
+					file.createNewFile();
+					PrintWriter out = new PrintWriter(new BufferedWriter(
+							new FileWriter(file, true)));
+					out.println(body);
+					out.close();
+					response = HttpResponseFactory.create200OK(file,
+							Protocol.CLOSE);
 				}
-				else {
-					 file.createNewFile();
-					 PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
-					 out.println(body);
-					 out.close();
-					 response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
-				}
+			}// create all the needed directories and then create the file. Then
+				// add anything in the body to the file
+			else {
+				uri = uri.substring(0, uri.indexOf(file.getName()));
+				new File(rootDirectory + uri).mkdir();
+				file.createNewFile();
+				PrintWriter out = new PrintWriter(new BufferedWriter(
+						new FileWriter(file, true)));
+				out.println(body);
+				out.close();
+				response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
 			}
-			else { // Its a file
-				// Lets create 200 OK response
-				 file.createNewFile();
-				 PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
-				 out.println(body);
-				 out.close();
-				 response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
-			}
-		}//create all the needed directories and then create the file. Then add anything in the body to the file
-		else {
-			 uri = uri.substring(0, uri.indexOf(file.getName()));
-			 new File(rootDirectory + uri).mkdir();
-			 file.createNewFile();
-			 PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
-			 out.println(body);
-			 out.close();
-			 response = HttpResponseFactory.create200OK(file, Protocol.CLOSE);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		return response;
 	}
@@ -187,7 +193,7 @@ public abstract class Servlet{
 		String rootDirectory = request.getDirectoryPath();
 		// Combine them together to form absolute file path
 		File file = new File(rootDirectory + uri);
-		HttpResponse response;
+		HttpResponse response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
 		// Check if the file exists
 		if(file.exists()) {
 			if(file.isDirectory()) {
@@ -201,10 +207,7 @@ public abstract class Servlet{
 				response = HttpResponseFactory.create204NoContent(Protocol.CLOSE);
 			}
 		}
-		else {
-			// File does not exist so lets create 404 file not found code
-			response = HttpResponseFactory.create404NotFound(Protocol.CLOSE);
-		}
+		
 		return response;
 	}
 	/**

@@ -189,26 +189,22 @@ public class ConnectionHandler implements Runnable {
 		String method = request.getMethod();
 		String pluginName = request.getPluginName();
 		String servletName = this.server.getServletClassName(uri, method);
-		HttpResponse response = HttpResponseFactory
-				.create400BadRequest(Protocol.CLOSE);
+		HttpResponse response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
 
 		if (servletName != null) {
-			HashMap<String, ArrayList<Class<?>>> plugins = this.server
-					.getPlugins();
+			HashMap<String, ArrayList<Class<?>>> plugins = this.server.getPlugins();
 			if (plugins.containsKey(pluginName)) {
 				ArrayList<Class<?>> servlets = plugins.get(pluginName);
 
 				for (Class<?> servletClass : servlets) {
 					if (servletClass.getName().equalsIgnoreCase(servletName)) {
 						try {
-							Servlet servlet = (Servlet) servletClass
-									.newInstance();
+							Servlet servlet = (Servlet) servletClass.newInstance();
 
 							if (servlet.handlesRequestType(method)) {
 								response = servlet.handleRequest(request);
 							} else {
-								response = HttpResponseFactory
-										.create501NotImplemented(Protocol.CLOSE);
+								response = HttpResponseFactory.create501NotImplemented(Protocol.CLOSE);
 							}
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -222,8 +218,7 @@ public class ConnectionHandler implements Runnable {
 			if (staticServlet.handlesRequestType(method)) {
 				response = staticServlet.handleRequest(request);
 			} else {
-				response = HttpResponseFactory
-						.create501NotImplemented(Protocol.CLOSE);
+				response = HttpResponseFactory.create501NotImplemented(Protocol.CLOSE);
 			}
 
 		}

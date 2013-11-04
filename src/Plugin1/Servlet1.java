@@ -60,7 +60,7 @@ public class Servlet1 extends Servlet {
 		} else if (request.getMethod().equalsIgnoreCase("DELETE")) {
 			return handleDelete(request);
 		}
-		else return null;
+		else return HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
 	}
 
 	/* (non-Javadoc)

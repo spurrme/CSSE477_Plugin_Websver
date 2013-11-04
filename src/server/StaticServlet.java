@@ -32,6 +32,8 @@ package server;
 import plugin.Servlet;
 import protocol.HttpRequest;
 import protocol.HttpResponse;
+import protocol.HttpResponseFactory;
+import protocol.Protocol;
 
 /**
  * 
@@ -44,7 +46,7 @@ public class StaticServlet extends Servlet {
 	 */
 	@Override
 	public HttpResponse handleRequest(HttpRequest request) {
-		HttpResponse response = null;
+		HttpResponse response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
 		try{
 			if(request.getMethod().equalsIgnoreCase("GET")){
 				response = handleGet(request);

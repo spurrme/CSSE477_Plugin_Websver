@@ -103,7 +103,7 @@ public class PluginManager extends Thread{
 			String[] pluginMappings = openFile(configFile.getAbsolutePath());
 	    	
 		    for (int i = 0; i < pluginMappings.length; i++)
-		    {
+ {
 				try {
 					String[] parsedMapping = pluginMappings[i].split("\\s+");
 					String requestMethod = parsedMapping[0];
