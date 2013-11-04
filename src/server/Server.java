@@ -126,7 +126,6 @@ public class Server implements Runnable {
 			this.welcomeSocket = new ServerSocket(port);
 			
 			PluginManager manager = new PluginManager("Plugins", this);
-			
 			// Now keep welcoming new connections until stop flag is set to true
 			while(true) {
 				// Listen for incoming socket connection
@@ -198,7 +197,6 @@ public class Server implements Runnable {
 	 */
 	public String getServletClassName(String uri, String method) {
 		String servletClassName = null;
-		
 		if(this.servletMappings.containsKey(uri)) {
 			if(this.servletMappings.get(uri).containsKey(method)) {
 				servletClassName = this.servletMappings.get(uri).get(method);

@@ -236,6 +236,7 @@ public class PluginManager extends Thread{
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
+		System.out.println("sdkjldsjf");
 		Path dir = Paths.get(dirLocation.getPath());
 		try {
 			caller.setPlugins(readInPlugins());
