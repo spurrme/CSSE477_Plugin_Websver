@@ -126,7 +126,7 @@ public class Server implements Runnable {
 			this.welcomeSocket = new ServerSocket(port);
 			
 			PluginManager manager = new PluginManager("Plugins", this);
-			new Thread(manager).start();
+			manager.run();
 			
 			// Now keep welcoming new connections until stop flag is set to true
 			while(true) {
