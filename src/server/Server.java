@@ -60,6 +60,7 @@ public class Server implements Runnable {
 		this.connections = 0;
 		this.serviceTime = 0;
 		this.window = window;
+		this.servletMappings = new HashMap<String, HashMap<String, String>>();
 	}
 
 	/**
