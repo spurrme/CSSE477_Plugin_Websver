@@ -49,15 +49,10 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.ArrayList;
 import java.util.HashMap;
-<<<<<<< HEAD
-=======
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
-
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
-
->>>>>>> e62ab41969a16def5901a9816fa66076ef054672
 import server.Server;
 import static java.nio.file.StandardWatchEventKinds.*;
 
