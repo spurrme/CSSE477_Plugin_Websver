@@ -28,23 +28,44 @@
  
 package Plugin1;
 
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import plugin.Servlet;
 import protocol.HttpRequest;
 import protocol.HttpResponse;
+import protocol.HttpResponseFactory;
+import protocol.Protocol;
 
 /**
  * 
  * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
  */
-public class Servlet2 extends Servlet {
+public class ServletWebLoader extends Servlet {
 
 	/* (non-Javadoc)
 	 * @see plugin.Servlet#handleRequest(protocol.HttpRequest)
 	 */
 	@Override
 	public HttpResponse handleRequest(HttpRequest request) {
-		// TODO Auto-generated method stub
-		return null;
+			HttpResponse response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);
+		if (request.getMethod().equalsIgnoreCase("LOAD")){
+			response = HttpResponseFactory.create204NoContent(Protocol.CLOSE);
+			if(Desktop.isDesktopSupported()){
+				try {
+					Desktop.getDesktop().browse(new URI(request.getBody()));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		} 
+		return response;
 	}
 
 	/* (non-Javadoc)
@@ -52,8 +73,10 @@ public class Servlet2 extends Servlet {
 	 */
 	@Override
 	public boolean handlesRequestType(String requestType) {
-		// TODO Auto-generated method stub
-		return false;
+		if (requestType.equalsIgnoreCase("LOAD")) {
+			return true;
+		}
+		else return false;
 	}
 
 }
