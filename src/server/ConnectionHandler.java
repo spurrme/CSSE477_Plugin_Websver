@@ -129,7 +129,8 @@ public class ConnectionHandler implements Runnable {
 			this.sendResponse(response);
 		}
 		else {
-			this.delegateRequestToServlet(request);
+			request.setDirectoryPath(this.server.getRootDirectory());
+			sendResponse(this.delegateRequestToServlet(request));
 		}
 	}
 	
@@ -200,7 +201,7 @@ public class ConnectionHandler implements Runnable {
 		return response;
 	*/
 		String uri = request.getUri();
-		String method = request.getUri();
+		String method = request.getMethod();
 		String pluginName = request.getPluginName();
 		String servletName = this.server.getServletClassName(uri, method);
 		HttpResponse response = HttpResponseFactory.create400BadRequest(Protocol.CLOSE);

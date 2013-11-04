@@ -49,9 +49,9 @@ public class StaticServlet extends Servlet {
 			if(request.getMethod().equalsIgnoreCase("GET")){
 				response = handleGet(request);
 			}else if(request.getMethod().equalsIgnoreCase("POST")){
-				response = handlePut(request);
-			}else if(request.getMethod().equalsIgnoreCase("PUT")){
 				response = handlePost(request);
+			}else if(request.getMethod().equalsIgnoreCase("PUT")){
+				response = handlePut(request);
 			}else if(request.getMethod().equalsIgnoreCase("DELETE")){
 				response = handleDelete(request);
 			}

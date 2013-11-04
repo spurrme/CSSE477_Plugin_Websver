@@ -40,7 +40,7 @@ public class HttpRequest {
 	private String uri;
 	private String version;
 	private Map<String, String> header;
-	private String body;
+	private static String body;
 	private String directoryPath;
 	private String pluginName;
 	private HttpRequest() {
@@ -130,14 +130,13 @@ public class HttpRequest {
 		// Rest of the request is a header that maps keys to values
 		// e.g. Host: www.rose-hulman.edu
 		// We will convert both the strings to lower case to be able to search later
-		line = reader.readLine().trim();
-		
-		String previous = "";
-		
-		while(!(line.equals("") && previous.equals(""))) {
+		while(!line.equals("")) {
 			// THIS IS A PATCH 
 			// Instead of a string tokenizer, we are using string split
 			// Lets break the line into two part with first space as a separator 
+			
+			// First lets trim the line to remove escape characters
+			line = line.trim();
 			
 			// Now, get index of the first occurrence of space
 			int index = line.indexOf(' ');
@@ -147,27 +146,29 @@ public class HttpRequest {
 				String key = line.substring(0, index); // Get first part, e.g. "Host:"
 				String value = line.substring(index+1); // Get the rest, e.g. "www.rose-hulman.edu"
 				
-				if(!key.contains(":")) { // It contains content; not a header
-					request.body = request.body.concat(line);
-				}
-				else {
-					// Lets strip off the white spaces from key if any and change it to lower case
-					key = key.trim().toLowerCase();
+				// Lets strip off the white spaces from key if any and change it to lower case
+				key = key.trim().toLowerCase();
 				
-					// Lets also remove ":" from the key
-					key = key.substring(0, key.length() - 1);
+				// Lets also remove ":" from the key
+				key = key.substring(0, key.length() - 1);
 				
-					// Lets strip white spaces if any from value as well
-					value = value.trim();
+				// Lets strip white spaces if any from value as well
+				value = value.trim();
 				
-					// Now lets put the key=>value mapping to the header map
-					request.header.put(key, value);
-				}
+				// Now lets put the key=>value mapping to the header map
+				request.header.put(key, value);
 			}
 			
 			// Processed one more line, now lets read another header line and loop
-			previous = line;
-			line = reader.readLine();
+			line = reader.readLine().trim();
+		}
+		body = "";
+		if(reader.ready()){
+			line = reader.readLine().trim();
+			while(!line.equals("")){
+				body += line;
+				line = reader.readLine().trim();
+			}
 		}
 		return request;
 	}

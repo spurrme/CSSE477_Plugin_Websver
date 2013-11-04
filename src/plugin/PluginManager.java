@@ -53,6 +53,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
 import server.Server;
 import static java.nio.file.StandardWatchEventKinds.*;
 
@@ -79,24 +81,25 @@ public class PluginManager extends ClassLoader implements Runnable{
 				String pluginName = fileName.replaceAll(".jar", "");
 				ArrayList<Class<?>> classes = getClassesFromJar(file.getAbsolutePath());
 				plugins.put(pluginName, classes);	
+			} else if (fileName.endsWith(".txt")) {
+				updateConfigurationMap(file);
 			}
 		}
 		
 		return plugins;
 	}
 	
-	
 	/**
 	 * Updates the server's map of Request Method + Plugin Name + Servet URI -> Servlet Class Name
 	 * 
 	 * @param plugin File
 	 */
-	private void updateConfigurationMap(File currentPlugin) {
+	private void updateConfigurationMap(File configFile) {
 		
 		try 
 		{
 			//config file should be named config.txt to work
-			String[] pluginMappings = openFile(currentPlugin.getAbsolutePath() + "/config.txt");
+			String[] pluginMappings = openFile(configFile.getAbsolutePath());
 	    	
 		    for (int i = 0; i < pluginMappings.length; i++)
 		    {

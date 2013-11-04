@@ -60,6 +60,7 @@ public class Server implements Runnable {
 		this.connections = 0;
 		this.serviceTime = 0;
 		this.window = window;
+		this.servletMappings = new HashMap<String, HashMap<String, String>>();
 	}
 
 	/**
@@ -125,7 +126,7 @@ public class Server implements Runnable {
 			this.welcomeSocket = new ServerSocket(port);
 			
 			PluginManager manager = new PluginManager("Plugins", this);
-			new Thread(manager).start();
+			manager.run();
 			
 			// Now keep welcoming new connections until stop flag is set to true
 			while(true) {
@@ -139,7 +140,7 @@ public class Server implements Runnable {
 				
 				// Create a handler for this incoming connection and start the handler in a new thread
 				ConnectionHandler handler = new ConnectionHandler(this, connectionSocket);
-				new Thread(handler).start();
+				handler.run();
 			}
 			this.welcomeSocket.close();
 		}

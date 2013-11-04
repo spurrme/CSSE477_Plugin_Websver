@@ -42,8 +42,10 @@ public class Servlet1 extends Servlet {
 	 */
 	@Override
 	public HttpResponse handleRequest(HttpRequest request) {
-		// TODO Auto-generated method stub
-		return null;
+		if (request.getMethod().equalsIgnoreCase("GET")) {
+			return handleGet(request);
+		} 
+		else return null;
 	}
 
 	/* (non-Javadoc)
@@ -51,8 +53,10 @@ public class Servlet1 extends Servlet {
 	 */
 	@Override
 	public boolean handlesRequestType(String requestType) {
-		// TODO Auto-generated method stub
-		return false;
+		if (requestType.equalsIgnoreCase("GET")) {
+			return true;
+		}
+		else return false;
 	}
 
 }
