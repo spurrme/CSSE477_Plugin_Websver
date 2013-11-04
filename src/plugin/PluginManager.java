@@ -61,13 +61,14 @@ import static java.nio.file.StandardWatchEventKinds.*;
  * 
  * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
  */
-public class PluginManager extends ClassLoader implements Runnable{
+public class PluginManager extends Thread{
 	private File dirLocation;
 	private Server caller;
 
 	public PluginManager(String defaultLocation, Server caller){
 		this.dirLocation = new File(defaultLocation);
 		this.caller = caller;
+		start();
 	}
 	
 	public HashMap<String, ArrayList<Class<?>>> readInPlugins() throws Exception{
