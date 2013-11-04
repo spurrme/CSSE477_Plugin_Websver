@@ -29,6 +29,9 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import plugin.PluginManager;
+
+
 /**
  * This represents a welcoming server for the incoming
  * TCP request from a HTTP client such as a web browser. 
@@ -43,6 +46,7 @@ public class Server implements Runnable {
 	private HashMap<String, ArrayList<Class<?>>> plugins;
 	private long connections;
 	private long serviceTime;
+	public HashMap<String, HashMap<String, String>> servletMappings;
 	
 	private WebServer window;
 	/**
@@ -120,6 +124,9 @@ public class Server implements Runnable {
 		try {
 			this.welcomeSocket = new ServerSocket(port);
 			
+			PluginManager manager = new PluginManager("Plugins", this);
+			new Thread(manager).start();
+			
 			// Now keep welcoming new connections until stop flag is set to true
 			while(true) {
 				// Listen for incoming socket connection
@@ -183,5 +190,21 @@ public class Server implements Runnable {
 	 */
 	public void setPlugins(HashMap<String, ArrayList<Class<?>>> plugins) {
 		this.plugins = plugins;
+	}
+
+	/**
+	 * @param configkey
+	 * @return 
+	 */
+	public String getServletClassName(String uri, String method) {
+		String servletClassName = null;
+		
+		if(this.servletMappings.containsKey(uri)) {
+			if(this.servletMappings.get(uri).containsKey(method)) {
+				servletClassName = this.servletMappings.get(uri).get(method);
+			}
+		}
+		
+		return servletClassName;
 	}
 }

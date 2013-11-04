@@ -42,6 +42,7 @@ public class HttpRequest {
 	private Map<String, String> header;
 	private String body;
 	private String directoryPath;
+	private String pluginName;
 	private HttpRequest() {
 		this.header = new HashMap<String, String>();
 		this.body = new String("");
@@ -206,5 +207,13 @@ public class HttpRequest {
 	 */
 	public void setDirectoryPath(String directoryPath) {
 		this.directoryPath = directoryPath;
+	}
+
+	/**
+	 * @return the pluginName
+	 */
+	public String getPluginName() {
+		int index = this.uri.indexOf('/');
+		return this.uri.substring(0, index);
 	}
 }

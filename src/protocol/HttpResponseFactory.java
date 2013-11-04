@@ -166,4 +166,7 @@ public class HttpResponseFactory {
 		// TODO fill in this method
 		return null;
 	}
+	public static HttpResponse create501NotImplemented(String connection) {
+		return null;
+	}
 }
